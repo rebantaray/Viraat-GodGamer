@@ -171,4 +171,82 @@
                 </tbody>
             </table>
         </div>
-        <div class="scroll-top" onclick="go
+        <div class="scroll-top" onclick="go('hero')"><i class="fa-solid fa-chevron-up"></i><br>BACK</div>
+    </section>
+
+    <section id="music" class="section">
+        <h2 style="font-size: 2.5rem; letter-spacing: 5px; margin-bottom: 30px; color: #70a1ff;">LATEST THEME</h2>
+        <div class="music-card">
+            <i class="fa-solid fa-music" style="font-size: 2rem; color: #70a1ff;"></i>
+            <h3 style="font-size: 1.5rem; letter-spacing: 2px; margin: 15px 0 5px 0;">Eversince I Was A Kid</h3>
+            <p style="color: #70a1ff; margin-bottom: 20px; font-size: 0.9rem;">THE VOID PLAYLIST</p>
+            <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; font-size: 0.8rem; color: #aaa;">
+                Music Player Integration Active
+            </div>
+        </div>
+        <div class="scroll-top" onclick="go('hero')"><i class="fa-solid fa-chevron-up"></i><br>BACK</div>
+    </section>
+
+    <script>
+        const canvas = document.getElementById('snow-canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height, snowflakes;
+        let mouse = { x: -1000, y: -1000 };
+
+        function initSnow() {
+            width = window.innerWidth; height = window.innerHeight;
+            canvas.width = width; canvas.height = height;
+            snowflakes = [];
+            for (let i = 0; i < 100; i++) {
+                snowflakes.push({
+                    x: Math.random() * width, y: Math.random() * height,
+                    radius: Math.random() * 3 + 1, speed: Math.random() * 1 + 0.5,
+                    opacity: Math.random() * 0.5 + 0.3
+                });
+            }
+        }
+
+        window.addEventListener('mousemove', (e) => { mouse.x = e.x; mouse.y = e.y; });
+        window.addEventListener('touchstart', (e) => { mouse.x = e.touches[0].clientX; mouse.y = e.touches[0].clientY; });
+
+        function drawSnow() {
+            ctx.clearRect(0, 0, width, height);
+            snowflakes.forEach(flake => {
+                let dx = mouse.x - flake.x; let dy = mouse.y - flake.y;
+                let distance = Math.sqrt(dx * dx + dy * dy);
+                if (distance < 100) {
+                    let force = (100 - distance) / 100;
+                    flake.x -= (dx / distance) * force * 5;
+                    flake.y -= (dy / distance) * force * 5;
+                }
+                flake.y += flake.speed;
+                if (flake.y > height) { flake.y = -10; flake.x = Math.random() * width; }
+                ctx.beginPath(); ctx.arc(flake.x, flake.y, flake.radius, 0, Math.PI * 2);
+                ctx.fillStyle = 'white'; ctx.globalAlpha = flake.opacity; ctx.fill();
+            });
+            requestAnimationFrame(drawSnow);
+        }
+
+        function expand() {
+            document.getElementById('entry').style.display = 'none';
+            document.querySelectorAll('.section').forEach(s => s.style.display = 'flex');
+            document.getElementById('video-wrapper').style.display = 'block';
+            document.getElementById('overlay').style.display = 'block';
+            const v = document.getElementById('v');
+            v.muted = false; v.volume = 0.5; v.play().catch(() => { v.muted = true; v.play(); });
+        }
+
+        function go(id) { document.getElementById(id).scrollIntoView({ behavior: 'smooth' }); }
+
+        function copyDiscord() {
+            navigator.clipboard.writeText("viraatgodgamer");
+            const t = document.getElementById('toast');
+            t.style.display = 'block';
+            setTimeout(() => { t.style.display = 'none'; }, 2000);
+        }
+
+        window.addEventListener('resize', initSnow);
+        initSnow(); drawSnow();
+    </script>
+</body>
+</html>

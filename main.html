@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gamer | Viraat Kumar</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
+        
+        body, html { 
+            width: 100%; height: 100%; 
+            background: #000; overflow-x: hidden; 
+            font-family: 'Inter', sans-serif; 
+            color: white; cursor: crosshair; 
+        }
+
+        /* Interactive Snow Canvas */
+        #snow-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 5; 
+            pointer-events: none;
+        }
+
+        /* Video Background Layer */
+        #video-wrapper { position: fixed; inset: 0; z-index: 1; display: none; background: #000; }
+        video { 
+            width: 100%; height: 100%; 
+            object-fit: cover; opacity: 0.8; 
+            filter: brightness(0.9); 
+        }
+
+        /* Dark Radial Overlay */
+        .overlay { 
+            position: fixed; inset: 0; 
+            background: radial-gradient(circle, transparent 20%, rgba(0,0,0,0.85) 100%); 
+            z-index: 2; display: none; 
+        }
+
+        /* 1. Entrance Screen */
+        #entry { 
+            position: fixed; inset: 0; z-index: 100; 
+            display: flex; flex-direction: column; 
+            justify-content: center; align-items: center; background: #000; 
+        }
+        .gojo-btn { 
+            position: relative; z-index: 101; 
+            width: 160px; height: 160px; border-radius: 50%; 
+            background: url('https://w0.peakpx.com/wallpaper/144/22/HD-wallpaper-satoru-gojo-gojo-satoru-jujutsu-kaisen.jpg') center/cover; 
+            border: 2px solid #333; cursor: pointer; transition: 0.5s; filter: grayscale(1); 
+        }
+        .gojo-btn:hover { 
+            filter: grayscale(0); transform: scale(1.1); 
+            box-shadow: 0 0 30px #70a1ff; 
+        }
+
+        /* 2. Main Content Sections */
+        .section { 
+            position: relative; width: 100%; 
+            min-height: 100vh; display: none; 
+            flex-direction: column; align-items: center; 
+            justify-content: center; z-index: 10; 
+            padding: 60px 20px; 
+        }
+
+        /* Profile Card */
+        .profile-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(112, 161, 255, 0.2);
+            padding: 50px; border-radius: 30px;
+            max-width: 900px; width: 100%;
+            display: flex; flex-wrap: wrap; gap: 40px; align-items: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+        .gallery-img { width: 250px; height: 350px; object-fit: cover; border-radius: 15px; border: 2px solid #70a1ff; }
+        h1 { font-size: 4rem; letter-spacing: 8px; text-transform: uppercase; color: #70a1ff; text-shadow: 0 0 15px #70a1ff; }
+        .details-p { margin: 8px 0; font-size: 1.1rem; color: #ccc; }
+        .details-p i { color: #70a1ff; margin-right: 10px; }
+
+        /* Interest Table */
+        .interest-box {
+            width: 100%; max-width: 1000px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px; overflow: hidden; margin-top: 20px;
+        }
+        .interest-table { width: 100%; border-collapse: collapse; }
+        .interest-table th { background: rgba(112, 161, 255, 0.15); padding: 25px; font-size: 1.5rem; color: #70a1ff; border-bottom: 2px solid #70a1ff; }
+        .interest-table td { padding: 40px; vertical-align: top; width: 50%; border: 1px solid rgba(255, 255, 255, 0.05); }
+        .game-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 20px; }
+        .game-item { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; text-align: center; border: 1px solid transparent; transition: 0.3s; }
+        .game-item:hover { border-color: #70a1ff; background: rgba(112, 161, 255, 0.1); transform: translateY(-5px); }
+
+        /* Music Card Styling */
+        .music-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(112, 161, 255, 0.3);
+            padding: 40px; border-radius: 25px;
+            max-width: 600px; width: 100%; text-align: center;
+        }
+        .music-card i { font-size: 3rem; color: #70a1ff; margin-bottom: 20px; }
+
+        /* Buttons */
+        .btn-group { display: flex; gap: 15px; margin-top: 30px; flex-wrap: wrap; }
+        .nav-btn {
+            padding: 12px 25px; border: 1px solid #70a1ff; color: white;
+            text-decoration: none; border-radius: 5px; background: rgba(0,0,0,0.6);
+            cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 10px;
+        }
+        .nav-btn:hover { background: #70a1ff; box-shadow: 0 0 20px #70a1ff; transform: translateY(-3px); }
+
+        /* Toast Popup */
+        #toast {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: #70a1ff; color: white; padding: 12px 25px; border-radius: 50px;
+            display: none; z-index: 1000; font-weight: bold; box-shadow: 0 5px 15px rgba(112, 161, 255, 0.4);
+        }
+
+        .scroll-top { margin-top: 50px; opacity: 0.5; cursor: pointer; transition: 0.3s; text-align: center; }
+        .scroll-top:hover { opacity: 1; color: #70a1ff; }
+    </style>
+</head>
+<body>
+
+    <canvas id="snow-canvas"></canvas>
+    <div id="toast">Discord Copied!</div>
+
+    <div id="entry">
+        <div class="gojo-btn" onclick="expand()"></div>
+        <p style="color: #777; margin-top: 25px; letter-spacing: 2px; text-align: center;">"The One You Ignore Today, May Inspire The World Tomorrow..."</p>
+    </div>
+
+    <div id="video-wrapper"><video id="v" loop playsinline><source src="bg.mp4" type="video/mp4"></video></div>
+    <div class="overlay" id="overlay"></div>
+
+    <section id="hero" class="section">
+        <div class="profile-card">
+            <img src="image.jpg" class="gallery-img" alt="Viraat">
+            <div class="info-text">
+                <h1>VIRAAT GODGAMER</h1>
+                <p style="color:#70a1ff; letter-spacing:3px; margin-bottom:20px; font-weight: bold;">THE HONORED ONE</p>
+                <p class="details-p"><i class="fa-solid fa-calendar-days"></i> <strong>DOB:</strong> October 17, 2011</p>
+                <p class="details-p"><i class="fa-solid fa-phone"></i> <strong>Phone:</strong> +91 97481 64155</p>
+                <p class="details-p"><i class="fa-solid fa-bolt"></i> <strong>Status:</strong> Special Grade Gamer</p>
+                <div class="btn-group">
+                    <button class="nav-btn" onclick="go('interests')"><i class="fa-solid fa-gamepad"></i> Interests</button>
+                    <button class="nav-btn" onclick="go('music')"><i class="fa-solid fa-music"></i> My Song</button>
+                    <button class="nav-btn" onclick="copyDiscord()"><i class="fa-brands fa-discord"></i> Discord</button>
+                    <a href="https://www.youtube.com/channel/UCMb8F93ROx5MVzQ0oOI-CJg" target="_blank" class="nav-btn"><i class="fa-brands fa-youtube"></i> YouTube</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="interests" class="section">
+        <h2 style="font-size: 3rem; letter-spacing: 10px; margin-bottom: 40px; color: #70a1ff;">MY INTERESTS</h2>
+        <div class="interest-box">
+            <table class="interest-table">
+                <thead>
+                    <tr>
+                        <th><i class="fa-solid fa-headset"></i> GAMING</th>
+                        <th><i class="fa-solid fa-bicycle"></i> OUTDOORS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <div class="game-grid">
+                                <div class="game-item"><i class="fa-solid fa-cube"></i>Minecraft</div>
+                                <div class="game-item"><i class="fa-solid fa-person-rifle"></i>Fortnite</div>
+                                <div class="game-item"><i class="fa-solid fa-robot"></i>Roblox</div>
+                                <div class="game-item"><i class="fa-solid fa-crosshairs"></i>Valorant</div>
+                                <div class="game-item"><i class="fa-solid fa-ghost"></i>Among Us</div>
+                            </div>
+                        </td>
+                        <td style="text-align: center;">
+                            <i class="fa-solid fa-bicycle" style="font-size: 5rem; color: #70a1ff; margin-bottom: 20px;"></i>
+                            <h3 style="letter-spacing: 5px;">CYCLING</h3>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="scroll-top" onclick="go('hero')"><i class="fa-solid fa-chevron-up"></i><br>BACK</div>
+    </section>
+
+    <section id="music" class="section">
+        <h2 style="font-size: 3rem; letter-spacing: 10px; margin-bottom: 40px; color: #70a1ff;">THE LATEST THEME</h2>
+        <div class="music-card">
+            <i class="fa-solid fa-music"></i>
+            <h3 style="font-size: 1.8rem; letter-spacing: 3px; margin-bottom: 10px;">Eversince I Was A Kid</h3>
+            <p style="color: #70a1ff; margin-bottom: 25px;">THE VOID PLAYLIST</p>
+          
+        </div>
+        <div class="scroll-top" onclick="go('hero')"><i class="fa-solid fa-chevron-up"></i><br>BACK</div>
+    </section>
+
+    <script>
+        const canvas = document.getElementById('snow-canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height, snowflakes;
+        let mouse = { x: -1000, y: -1000 };
+
+        function initSnow() {
+            width = window.innerWidth; height = window.innerHeight;
+            canvas.width = width; canvas.height = height;
+            snowflakes = [];
+            for (let i = 0; i < 150; i++) {
+                snowflakes.push({
+                    x: Math.random() * width, y: Math.random() * height,
+                    radius: Math.random() * 3 + 1, speed: Math.random() * 1 + 0.5,
+                    opacity: Math.random() * 0.5 + 0.3
+                });
+            }
+        }
+
+        window.addEventListener('mousemove', (e) => { mouse.x = e.x; mouse.y = e.y; });
+
+        function drawSnow() {
+            ctx.clearRect(0, 0, width, height);
+            snowflakes.forEach(flake => {
+                let dx = mouse.x - flake.x; let dy = mouse.y - flake.y;
+                let distance = Math.sqrt(dx * dx + dy * dy);
+                if (distance < 120) {
+                    let force = (120 - distance) / 120;
+                    flake.x -= (dx / distance) * force * 6;
+                    flake.y -= (dy / distance) * force * 6;
+                }
+                flake.y += flake.speed;
+                if (flake.y > height) { flake.y = -10; flake.x = Math.random() * width; }
+                ctx.beginPath(); ctx.arc(flake.x, flake.y, flake.radius, 0, Math.PI * 2);
+                ctx.fillStyle = 'white'; ctx.shadowBlur = 8; ctx.shadowColor = '#70a1ff';
+                ctx.globalAlpha = flake.opacity; ctx.fill(); ctx.shadowBlur = 0;
+            });
+            requestAnimationFrame(drawSnow);
+        }
+
+        function expand() {
+            document.getElementById('entry').style.display = 'none';
+            document.querySelectorAll('.section').forEach(s => s.style.display = 'flex');
+            document.getElementById('video-wrapper').style.display = 'block';
+            document.getElementById('overlay').style.display = 'block';
+            const v = document.getElementById('v');
+            v.muted = false; v.volume = 0.5; v.play().catch(() => { v.muted = true; v.play(); });
+        }
+
+        function go(id) { document.getElementById(id).scrollIntoView({ behavior: 'smooth' }); }
+
+        function copyDiscord() {
+            navigator.clipboard.writeText("viraatgodgamer");
+            const t = document.getElementById('toast');
+            t.style.display = 'block';
+            setTimeout(() => { t.style.display = 'none'; }, 2000);
+        }
+
+        window.addEventListener('resize', initSnow);
+        initSnow(); drawSnow();
+    </script>
+</body>
+</html>
